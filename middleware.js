@@ -242,7 +242,7 @@ const isProtectedRoute = createRouteMatcher([
   "/sprint(.*)",
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   const { userId, orgId } = auth();
   const { pathname } = req.nextUrl;
 
@@ -253,7 +253,7 @@ export default clerkMiddleware((auth, req) => {
     return NextResponse.redirect(signInUrl);
   }
 
-  // 2️⃣ Routes allowed without org
+  // 2️⃣ Allowed routes without an org
   const allowedWithoutOrg = ["/", "/onboarding", "/project/create"];
   const isAllowedWithoutOrg =
     allowedWithoutOrg.includes(pathname) || pathname.startsWith("/project/");
