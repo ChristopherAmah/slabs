@@ -182,10 +182,58 @@
 // };
 
 
+// import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+// import { NextResponse } from "next/server";
+
+// // Define routes that require the user to be signed in
+// const isProtectedRoute = createRouteMatcher([
+//   "/onboarding(.*)",
+//   "/organization(.*)",
+//   "/project(.*)",
+//   "/issue(.*)",
+//   "/sprint(.*)",
+// ]);
+
+// export default clerkMiddleware((auth, req) => {
+//   const { userId, orgId } = auth();
+//   const { pathname } = req.nextUrl;
+
+//   // 1️⃣ Redirect unauthenticated users from protected routes → Sign-in
+//   if (!userId && isProtectedRoute(req)) {
+//     return auth().redirectToSignIn({ returnBackUrl: req.url });
+//   }
+
+//   // 2️⃣ Routes allowed without an active organization
+//   // NOTE: use regex or startsWith, not array includes, since pathname is full
+//   const allowedWithoutOrg = ["/", "/onboarding", "/project/create"];
+//   const isAllowedWithoutOrg =
+//     allowedWithoutOrg.includes(pathname) ||
+//     pathname.startsWith("/project/"); // ✅ allows /project/[id]
+
+//   // 3️⃣ Match org slug routes (like /organization/xyz)
+//   const orgBySlugRoute = /^\/organization\/[^\/]+/;
+
+//   // 4️⃣ If signed in but no org selected → redirect to onboarding
+//   if (userId && !orgId && !isAllowedWithoutOrg && !orgBySlugRoute.test(pathname)) {
+//     return NextResponse.redirect(new URL("/onboarding", req.url));
+//   }
+
+//   // 5️⃣ Otherwise, continue the request
+//   return NextResponse.next();
+// });
+
+// export const config = {
+//   matcher: [
+//     // Apply to all routes except static files & Next.js internals
+//     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+//     "/(api|trpc)(.*)",
+//   ],
+// };
+
+
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Define routes that require the user to be signed in
 const isProtectedRoute = createRouteMatcher([
   "/onboarding(.*)",
   "/organization(.*)",
@@ -198,33 +246,32 @@ export default clerkMiddleware((auth, req) => {
   const { userId, orgId } = auth();
   const { pathname } = req.nextUrl;
 
-  // 1️⃣ Redirect unauthenticated users from protected routes → Sign-in
+  // 1️⃣ Redirect unauthenticated users to sign-in
   if (!userId && isProtectedRoute(req)) {
-    return auth().redirectToSignIn({ returnBackUrl: req.url });
+    const signInUrl = new URL("/sign-in", req.url);
+    signInUrl.searchParams.set("redirect_url", req.url);
+    return NextResponse.redirect(signInUrl);
   }
 
-  // 2️⃣ Routes allowed without an active organization
-  // NOTE: use regex or startsWith, not array includes, since pathname is full
+  // 2️⃣ Routes allowed without org
   const allowedWithoutOrg = ["/", "/onboarding", "/project/create"];
   const isAllowedWithoutOrg =
-    allowedWithoutOrg.includes(pathname) ||
-    pathname.startsWith("/project/"); // ✅ allows /project/[id]
+    allowedWithoutOrg.includes(pathname) || pathname.startsWith("/project/");
 
-  // 3️⃣ Match org slug routes (like /organization/xyz)
+  // 3️⃣ Org slug routes
   const orgBySlugRoute = /^\/organization\/[^\/]+/;
 
-  // 4️⃣ If signed in but no org selected → redirect to onboarding
+  // 4️⃣ Redirect signed-in users without org
   if (userId && !orgId && !isAllowedWithoutOrg && !orgBySlugRoute.test(pathname)) {
     return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 
-  // 5️⃣ Otherwise, continue the request
+  // 5️⃣ Allow request
   return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    // Apply to all routes except static files & Next.js internals
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
   ],
