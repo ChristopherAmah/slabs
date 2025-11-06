@@ -5,6 +5,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 /**
  * CREATE PROJECT
+ * (Requires orgId + admin privileges)
  */
 export async function createProject(data) {
   const { userId } = auth();
@@ -44,23 +45,26 @@ export async function createProject(data) {
 }
 
 /**
- * GET PROJECT (no orgId required)
+ * GET PROJECT
+ * (auth required, no orgId or membership restriction)
  */
 export async function getProject(projectId) {
   const { userId } = auth();
+  if (!userId) throw new Error("Unauthorized");
 
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  if (!projectId) throw new Error("Project ID is required");
 
+  // Optional: ensure the user exists locally, but don’t block if missing
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
   });
 
   if (!user) {
-    throw new Error("User not found");
+    // Don’t throw — just continue
+    console.warn("User not found in local DB, but proceeding");
   }
 
+  // Fetch the project
   const project = await db.project.findUnique({
     where: { id: projectId },
     include: {
@@ -70,38 +74,15 @@ export async function getProject(projectId) {
     },
   });
 
-  if (!project) {
-    throw new Error("Project not found");
-  }
+  if (!project) throw new Error("Project not found");
 
-  // 🧠 Optional: still restrict access if project is tied to an organization
-  if (project.organizationId) {
-    try {
-      const { data: membershipList } =
-        await clerkClient().organizations.getOrganizationMembershipList({
-          organizationId: project.organizationId,
-        });
-
-      const isMember = membershipList.some(
-        (m) => m.publicUserData.userId === userId
-      );
-
-      if (!isMember) {
-        throw new Error(
-          "Access denied: you are not a member of this organization"
-        );
-      }
-    } catch (error) {
-      // Fail softly if Clerk org lookup fails (to prevent total page crash)
-      console.warn("Membership check failed:", error.message);
-    }
-  }
-
+  // ❌ Removed membership check — all logged-in users can view
   return project;
 }
 
 /**
  * DELETE PROJECT
+ * (Requires orgId + admin privileges)
  */
 export async function deleteProject({ projectId, orgId }) {
   const { userId } = auth();

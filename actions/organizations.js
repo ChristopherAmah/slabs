@@ -5,44 +5,29 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 /**
  * Get organization by slug
- * (still requires org membership)
+ * (auth required, no membership check)
  */
 export async function getOrganization(slug) {
   const { userId } = auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) throw new Error("User not found");
+  if (!slug) throw new Error("Organization slug is required");
 
   const organization = await clerkClient().organizations.getOrganization({ slug });
   if (!organization) return null;
-
-  // Check membership
-  const { data: membership } =
-    await clerkClient().organizations.getOrganizationMembershipList({
-      organizationId: organization.id,
-    });
-
-  const userMembership = membership.find(
-    (member) => member.publicUserData.userId === userId
-  );
-
-  if (!userMembership) return null;
 
   return organization;
 }
 
 /**
  * Get projects for an organization
+ * (auth required, no org membership check)
  */
 export async function getProjects(orgId) {
   const { userId } = auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) throw new Error("User not found");
-
-  if (!orgId) return []; // Return empty if orgId not provided
+  if (!orgId) return [];
 
   const projects = await db.project.findMany({
     where: { organizationId: orgId },
@@ -53,15 +38,24 @@ export async function getProjects(orgId) {
 }
 
 /**
- * Get issues assigned to or reported by a user
- * No orgId required
+ * Get issues assigned to or reported by the current logged-in user
+ * (no orgId required)
  */
-export async function getUserIssues(userId) {
-  if (!userId) throw new Error("No user id provided");
+export async function getUserIssues() {
+  const { userId } = auth();
+  if (!userId) throw new Error("Unauthorized");
 
-  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) throw new Error("User not found");
+  // Find the user in your local DB
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
 
+  if (!user) {
+    // Optional: just return an empty array instead of throwing an error
+    return [];
+  }
+
+  // Fetch issues assigned to or reported by this user
   const issues = await db.issue.findMany({
     where: {
       OR: [
@@ -82,14 +76,11 @@ export async function getUserIssues(userId) {
 
 /**
  * Get all users in an organization
- * (still requires orgId)
+ * (auth required, no org membership check)
  */
 export async function getOrganizationUsers(orgId) {
   const { userId } = auth();
   if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) throw new Error("User not found");
 
   if (!orgId) return [];
 
