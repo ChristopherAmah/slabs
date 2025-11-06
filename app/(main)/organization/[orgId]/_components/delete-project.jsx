@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import useFetch from "@/hooks/use-fetch";
 
 export default function DeleteProject({ projectId }) {
-  const { membership } = useOrganization();
+  const { membership, organization } = useOrganization();
   const router = useRouter();
 
   const {
@@ -23,7 +23,8 @@ export default function DeleteProject({ projectId }) {
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this project?")) {
-      deleteProjectFn(projectId);
+      // ✅ Pass orgId explicitly to the server action
+      deleteProjectFn({ projectId, orgId: organization?.id });
     }
   };
 

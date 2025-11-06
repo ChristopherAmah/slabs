@@ -80,14 +80,14 @@ export default function Home() {
         <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold gradient-title pb-6 flex flex-col">
           Streamline Your Workflow <br />
           <span className="flex mx-auto gap-3 sm:gap-4 items-center">
-            with
-            <Image
+            with TASKNET
+            {/* <Image
               src={"/logo2.png"}
               alt="Zscrum Logo"
               width={400}
               height={80}
               className="h-14 sm:h-24 w-auto object-contain"
-            />
+            /> */}
           </span>
         </h1>
         <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
@@ -96,18 +96,18 @@ export default function Home() {
         <p className="text-xl mb-12 max-w-2xl mx-auto"></p>
         <Link href="/onboarding">
           <Button size="lg" className="mr-4">
-            Get Started <ChevronRight size={18} className="ml-1" />
+            Join an Organization <ChevronRight size={18} className="ml-1" />
           </Button>
         </Link>
-        <Link href="#features">
+        {/* <Link href="#features">
           <Button size="lg" variant="outline">
             Learn More
           </Button>
-        </Link>
+        </Link> */}
       </section>
 
       {/* Features Section */}
-      <section id="features" className="bg-gray-900 py-20 px-5">
+      {/* <section id="features" className="bg-gray-900 py-20 px-5">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold mb-12 text-center">Key Features</h3>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -124,20 +124,20 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Companies Carousel */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold mb-12 text-center">
             Trusted by Industry Leaders
           </h3>
           <CompanyCarousel />
         </div>
-      </section>
+      </section> */}
 
       {/* FAQ Section */}
-      <section className="bg-gray-900 py-20 px-5">
+      {/* <section className="bg-gray-900 py-20 px-5">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold mb-12 text-center">
             Frequently Asked Questions
@@ -151,10 +151,10 @@ export default function Home() {
             ))}
           </Accordion>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
-      <section className="py-20 text-center px-5">
+      {/* <section className="py-20 text-center px-5">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold mb-6">
             Ready to Transform Your Workflow?
@@ -169,7 +169,7 @@ export default function Home() {
             </Button>
           </Link>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

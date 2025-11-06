@@ -1,13 +1,16 @@
-// components/ProjectList.jsx
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { getProjects } from "@/actions/organizations";
 import DeleteProject from "./delete-project";
 
 export default async function ProjectList({ orgId }) {
+  if (!orgId) {
+    return <p className="text-red-500">Organization ID missing.</p>;
+  }
+
   const projects = await getProjects(orgId);
 
-  if (projects.length === 0) {
+  if (!projects || projects.length === 0) {
     return (
       <p>
         No projects found.{" "}
@@ -15,7 +18,7 @@ export default async function ProjectList({ orgId }) {
           className="underline underline-offset-2 text-blue-200"
           href="/project/create"
         >
-          Create New.
+          Create New
         </Link>
       </p>
     );
@@ -28,7 +31,7 @@ export default async function ProjectList({ orgId }) {
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               {project.name}
-              <DeleteProject projectId={project.id} />
+              <DeleteProject projectId={project.id} orgId={orgId} />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -45,3 +48,4 @@ export default async function ProjectList({ orgId }) {
     </div>
   );
 }
+ 

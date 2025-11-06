@@ -3,15 +3,18 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+/**
+ * GET ISSUES FOR SPRINT
+ */
 export async function getIssuesForSprint(sprintId) {
-  const { userId, orgId } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
   const issues = await db.issue.findMany({
-    where: { sprintId: sprintId },
+    where: { sprintId },
     orderBy: [{ status: "asc" }, { order: "asc" }],
     include: {
       assignee: true,
@@ -22,14 +25,18 @@ export async function getIssuesForSprint(sprintId) {
   return issues;
 }
 
+/**
+ * CREATE ISSUE
+ */
 export async function createIssue(projectId, data) {
-  const { userId, orgId } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
-  let user = await db.user.findUnique({ where: { clerkUserId: userId } });
+  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
+  if (!user) throw new Error("User not found");
 
   const lastIssue = await db.issue.findFirst({
     where: { projectId, status: data.status },
@@ -44,10 +51,10 @@ export async function createIssue(projectId, data) {
       description: data.description,
       status: data.status,
       priority: data.priority,
-      projectId: projectId,
+      projectId,
       sprintId: data.sprintId,
       reporterId: user.id,
-      assigneeId: data.assigneeId || null, // Add this line
+      assigneeId: data.assigneeId || null,
       order: newOrder,
     },
     include: {
@@ -59,16 +66,17 @@ export async function createIssue(projectId, data) {
   return issue;
 }
 
+/**
+ * UPDATE ISSUE ORDER
+ */
 export async function updateIssueOrder(updatedIssues) {
-  const { userId, orgId } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
-  // Start a transaction
   await db.$transaction(async (prisma) => {
-    // Update each issue
     for (const issue of updatedIssues) {
       await prisma.issue.update({
         where: { id: issue.id },
@@ -83,10 +91,13 @@ export async function updateIssueOrder(updatedIssues) {
   return { success: true };
 }
 
+/**
+ * DELETE ISSUE
+ */
 export async function deleteIssue(issueId) {
-  const { userId, orgId } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
@@ -107,10 +118,8 @@ export async function deleteIssue(issueId) {
     throw new Error("Issue not found");
   }
 
-  if (
-    issue.reporterId !== user.id &&
-    !issue.project.adminIds.includes(user.id)
-  ) {
+  // Optional: check if the current user created the issue before deleting
+  if (issue.reporterId !== user.id) {
     throw new Error("You don't have permission to delete this issue");
   }
 
@@ -119,10 +128,13 @@ export async function deleteIssue(issueId) {
   return { success: true };
 }
 
+/**
+ * UPDATE ISSUE (status, priority, etc.)
+ */
 export async function updateIssue(issueId, data) {
-  const { userId, orgId } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
@@ -134,10 +146,6 @@ export async function updateIssue(issueId, data) {
 
     if (!issue) {
       throw new Error("Issue not found");
-    }
-
-    if (issue.project.organizationId !== orgId) {
-      throw new Error("Unauthorized");
     }
 
     const updatedIssue = await db.issue.update({

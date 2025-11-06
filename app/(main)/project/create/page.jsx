@@ -47,16 +47,19 @@ export default function CreateProjectPage() {
       return;
     }
 
-    createProjectFn(data);
+    if (!membership) {
+      alert("No organization selected. Please select an organization first.");
+      return;
+    }
+
+    createProjectFn({ ...data, orgId: membership.organization.id });
   };
 
   useEffect(() => {
     if (project) router.push(`/project/${project.id}`);
-  }, [loading]);
+  }, [project, router]);
 
-  if (!isOrgLoaded || !isUserLoaded) {
-    return null;
-  }
+  if (!isOrgLoaded || !isUserLoaded) return null;
 
   if (!isAdmin) {
     return (
@@ -90,6 +93,7 @@ export default function CreateProjectPage() {
             <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
           )}
         </div>
+
         <div>
           <Input
             id="key"
@@ -101,6 +105,7 @@ export default function CreateProjectPage() {
             <p className="text-red-500 text-sm mt-1">{errors.key.message}</p>
           )}
         </div>
+
         <div>
           <Textarea
             id="description"
@@ -114,9 +119,11 @@ export default function CreateProjectPage() {
             </p>
           )}
         </div>
+
         {loading && (
           <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />
         )}
+
         <Button
           type="submit"
           size="lg"
@@ -125,6 +132,7 @@ export default function CreateProjectPage() {
         >
           {loading ? "Creating..." : "Create Project"}
         </Button>
+
         {error && <p className="text-red-500 mt-2">{error.message}</p>}
       </form>
     </div>

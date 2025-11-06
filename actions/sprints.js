@@ -3,10 +3,14 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+/**
+ * CREATE SPRINT
+ * No orgId required.
+ */
 export async function createSprint(projectId, data) {
-  const { userId, orgId } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
@@ -15,7 +19,7 @@ export async function createSprint(projectId, data) {
     include: { sprints: { orderBy: { createdAt: "desc" } } },
   });
 
-  if (!project || project.organizationId !== orgId) {
+  if (!project) {
     throw new Error("Project not found");
   }
 
@@ -32,10 +36,14 @@ export async function createSprint(projectId, data) {
   return sprint;
 }
 
+/**
+ * UPDATE SPRINT STATUS
+ * No orgId required, but still verifies user and sprint existence.
+ */
 export async function updateSprintStatus(sprintId, newStatus) {
-  const { userId, orgId, orgRole } = auth();
+  const { userId } = auth();
 
-  if (!userId || !orgId) {
+  if (!userId) {
     throw new Error("Unauthorized");
   }
 
@@ -44,19 +52,13 @@ export async function updateSprintStatus(sprintId, newStatus) {
       where: { id: sprintId },
       include: { project: true },
     });
-    console.log(sprint, orgRole);
 
     if (!sprint) {
       throw new Error("Sprint not found");
     }
 
-    if (sprint.project.organizationId !== orgId) {
-      throw new Error("Unauthorized");
-    }
-
-    if (orgRole !== "org:admin") {
-      throw new Error("Only Admin can make this change");
-    }
+    // You can add an optional check to ensure the user owns the project, if you have ownership logic.
+    // e.g., if (sprint.project.createdBy !== userId) throw new Error("Unauthorized");
 
     const now = new Date();
     const startDate = new Date(sprint.startDate);

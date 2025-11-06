@@ -16,13 +16,14 @@ async function Header() {
       <nav className="py-6 px-4 flex justify-between items-center">
         <Link href="/">
           <h1 className="text-2xl font-bold">
-            <Image
+            {/* <Image
               src={"/logo2.png"}
               alt="Zscrum Logo"
               width={200}
               height={56}
               className="h-10 w-auto object-contain"
-            />
+            /> */}
+            TASKNET
           </h1>
         </Link>
         <div className="flex items-center gap-4">
@@ -33,7 +34,7 @@ async function Header() {
             </Button>
           </Link>
           <SignedOut>
-            <SignInButton forceRedirectUrl="/onboarding">
+            <SignInButton>
               <Button variant="outline">Login</Button>
             </SignInButton>
           </SignedOut>
