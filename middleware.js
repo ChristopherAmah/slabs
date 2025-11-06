@@ -76,17 +76,17 @@
 // };
 
 
-// import { clerkMiddleware } from "@clerk/nextjs/server";
-// import { NextResponse } from "next/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-// export default clerkMiddleware();
+export default clerkMiddleware();
 
-// export const config = {
-//   matcher: [
-//     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-//     "/(api|trpc)(.*)",
-//   ],
-// };
+export const config = {
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
+};
 
 
 // import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
@@ -231,48 +231,48 @@
 // };
 
 
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+// import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+// import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher([
-  "/onboarding(.*)",
-  "/organization(.*)",
-  "/project(.*)",
-  "/issue(.*)",
-  "/sprint(.*)",
-]);
+// const isProtectedRoute = createRouteMatcher([
+//   "/onboarding(.*)",
+//   "/organization(.*)",
+//   "/project(.*)",
+//   "/issue(.*)",
+//   "/sprint(.*)",
+// ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId, orgId } = auth();
-  const { pathname } = req.nextUrl;
+// export default clerkMiddleware(async (auth, req) => {
+//   const { userId, orgId } = auth();
+//   const { pathname } = req.nextUrl;
 
-  // 1️⃣ Redirect unauthenticated users to sign-in
-  if (!userId && isProtectedRoute(req)) {
-    const signInUrl = new URL("/sign-in", req.url);
-    signInUrl.searchParams.set("redirect_url", req.url);
-    return NextResponse.redirect(signInUrl);
-  }
+//   // 1️⃣ Redirect unauthenticated users to sign-in
+//   if (!userId && isProtectedRoute(req)) {
+//     const signInUrl = new URL("/sign-in", req.url);
+//     signInUrl.searchParams.set("redirect_url", req.url);
+//     return NextResponse.redirect(signInUrl);
+//   }
 
-  // 2️⃣ Allowed routes without an org
-  const allowedWithoutOrg = ["/", "/onboarding", "/project/create"];
-  const isAllowedWithoutOrg =
-    allowedWithoutOrg.includes(pathname) || pathname.startsWith("/project/");
+//   // 2️⃣ Allowed routes without an org
+//   const allowedWithoutOrg = ["/", "/onboarding", "/project/create"];
+//   const isAllowedWithoutOrg =
+//     allowedWithoutOrg.includes(pathname) || pathname.startsWith("/project/");
 
-  // 3️⃣ Org slug routes
-  const orgBySlugRoute = /^\/organization\/[^\/]+/;
+//   // 3️⃣ Org slug routes
+//   const orgBySlugRoute = /^\/organization\/[^\/]+/;
 
-  // 4️⃣ Redirect signed-in users without org
-  if (userId && !orgId && !isAllowedWithoutOrg && !orgBySlugRoute.test(pathname)) {
-    return NextResponse.redirect(new URL("/onboarding", req.url));
-  }
+//   // 4️⃣ Redirect signed-in users without org
+//   if (userId && !orgId && !isAllowedWithoutOrg && !orgBySlugRoute.test(pathname)) {
+//     return NextResponse.redirect(new URL("/onboarding", req.url));
+//   }
 
-  // 5️⃣ Allow request
-  return NextResponse.next();
-});
+//   // 5️⃣ Allow request
+//   return NextResponse.next();
+// });
 
-export const config = {
-  matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
-  ],
-};
+// export const config = {
+//   matcher: [
+//     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+//     "/(api|trpc)(.*)",
+//   ],
+// };
