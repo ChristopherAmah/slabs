@@ -80,7 +80,7 @@ export default function Home() {
         <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold gradient-title pb-6 flex flex-col">
           Streamline Your Workflow <br />
           <span className="flex mx-auto gap-3 sm:gap-4 items-center">
-            with TASKNET
+            with SLABS
             {/* <Image
               src={"/logo2.png"}
               alt="Zscrum Logo"

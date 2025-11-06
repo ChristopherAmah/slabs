@@ -23,7 +23,7 @@ async function Header() {
               height={56}
               className="h-10 w-auto object-contain"
             /> */}
-            TASKNET
+            SLABS
           </h1>
         </Link>
         <div className="flex items-center gap-4">
