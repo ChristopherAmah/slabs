@@ -191,7 +191,7 @@ export default function IssueCreationDrawer({
             disabled={createIssueLoading}
             className="w-full"
           >
-            {createIssueLoading ? "Creating..." : "Create Issue"}
+            {createIssueLoading ? "Creating..." : "Create Task"}
           </Button>
         </form>
       </DrawerContent>

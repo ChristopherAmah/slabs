@@ -212,7 +212,7 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
                         onClick={() => handleAddIssue(column.key)}
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Create Issue
+                        Create Task
                       </Button>
                     )}
                 </div>
