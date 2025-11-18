@@ -50,7 +50,6 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
     if (currentSprint.id) {
       fetchIssues(currentSprint.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSprint.id]);
 
   const handleAddIssue = (status) => {
@@ -73,26 +72,20 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
       toast.warning("Start the sprint to update board");
       return;
     }
-    if (currentSprint.status === "COMPLETED") {
-      toast.warning("Cannot update board after sprint end");
-      return;
-    }
+
     const { destination, source } = result;
 
-    if (!destination) {
-      return;
-    }
+    if (!destination) return;
 
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
-    ) {
+    )
       return;
-    }
 
     const newOrderedData = [...issues];
 
-    // source and destination list
+    // source and destination lists
     const sourceList = newOrderedData.filter(
       (list) => list.status === source.droppableId
     );
@@ -102,33 +95,15 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
     );
 
     if (source.droppableId === destination.droppableId) {
-      const reorderedCards = reorder(
-        sourceList,
-        source.index,
-        destination.index
-      );
-
-      reorderedCards.forEach((card, i) => {
-        card.order = i;
-      });
+      const reorderedCards = reorder(sourceList, source.index, destination.index);
+      reorderedCards.forEach((card, i) => (card.order = i));
     } else {
-      // remove card from the source list
       const [movedCard] = sourceList.splice(source.index, 1);
-
-      // assign the new list id to the moved card
       movedCard.status = destination.droppableId;
-
-      // add new card to the destination list
       destinationList.splice(destination.index, 0, movedCard);
 
-      sourceList.forEach((card, i) => {
-        card.order = i;
-      });
-
-      // update the order for each card in destination list
-      destinationList.forEach((card, i) => {
-        card.order = i;
-      });
+      sourceList.forEach((card, i) => (card.order = i));
+      destinationList.forEach((card, i) => (card.order = i));
     }
 
     const sortedIssues = newOrderedData.sort((a, b) => a.order - b.order);
@@ -169,9 +144,7 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
                   ref={provided.innerRef}
                   className="space-y-2"
                 >
-                  <h3 className="font-semibold mb-2 text-center">
-                    {column.name}
-                  </h3>
+                  <h3 className="font-semibold mb-2 text-center">{column.name}</h3>
                   {filteredIssues
                     ?.filter((issue) => issue.status === column.key)
                     .map((issue, index) => (
@@ -192,10 +165,7 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
                               onDelete={() => fetchIssues(currentSprint.id)}
                               onUpdate={(updated) =>
                                 setIssues((issues) =>
-                                  issues.map((issue) => {
-                                    if (issue.id === updated.id) return updated;
-                                    return issue;
-                                  })
+                                  issues.map((issue) => (issue.id === updated.id ? updated : issue))
                                 )
                               }
                             />
